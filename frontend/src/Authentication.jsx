@@ -60,6 +60,9 @@ const Authentication = () => {
                                 onChange={handleChange}
                                 onBlur={handleBlur}
                                 value={values.email}
+                                autoComplete="off"
+                                spellCheck='false'
+                                
                             />
                             <span className="error">
                                 {errors.email && touched.email && errors.email}

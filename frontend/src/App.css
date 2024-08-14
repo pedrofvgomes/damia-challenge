@@ -1,3 +1,7 @@
+*{
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+}
+
 #authentication {
   display: flex;
   flex-direction: row;
@@ -5,7 +9,6 @@
   width: 100%;
   height: 100%;
 }
-
 #authentication>div {
   width: 50%;
   height: 100%;
@@ -23,4 +26,54 @@
 #authentication form{
   display: flex;
   flex-direction: column;
+  text-align: center;
+}
+.error{
+  margin-bottom: 15px;
+  color: rgb(200,0,0);
+  font-size: 13px;
+}
+#authentication input{
+  border-radius: 10px;
+  border: none;
+  padding: 5px 10px;
+  box-shadow: 0px 0px 10px rgb(0,0,0,0.1);
+  margin: 5px 0px;
+  transition: all 0.1s ease-in;
+  text-align: center;
+  font-size: 20px;
+  color: #4a266a;
+}
+#authentication input:focus{
+  outline: solid 1px #4a266a;
+}
+#authentication input:hover{
+  box-shadow: 0px 0px 10px rgba(74, 38, 106, 0.4);
+  transition: all 0.1s ease-in;
+}
+#authentication label{
+  font-size: 17px;
+  font-weight: bold;
+  color: #4a266a;
+}
+#authentication button{
+  background-color: #4a266a;
+  color: white;
+  outline: none;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 0px;
+  border-radius: 15px;
+  width: 70%;
+  align-self: center;
+}
+#authentication h4{
+  font-weight: normal;
+  font-size: 14px;
+  margin-top: 10px;
+}
+#authentication h4 span{
+  color: #4a266a !important;
+  font-weight: bold;
 }
