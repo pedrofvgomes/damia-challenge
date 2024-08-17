@@ -5,7 +5,6 @@
 #authentication {
   display: flex;
   flex-direction: row;
-  background-color: yellow;
   width: 100%;
   height: 100%;
 }
@@ -31,7 +30,7 @@
 .error{
   margin-bottom: 15px;
   color: rgb(200,0,0);
-  font-size: 13px;
+  font-size: 14px;
 }
 #authentication input{
   border-radius: 10px;
@@ -52,7 +51,7 @@
   transition: all 0.1s ease-in;
 }
 #authentication label{
-  font-size: 17px;
+  font-size: 20px;
   font-weight: bold;
   color: #4a266a;
 }
@@ -61,7 +60,7 @@
   color: white;
   outline: none;
   border: none;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
   padding: 10px 0px;
   border-radius: 15px;
