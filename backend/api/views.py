@@ -1,7 +1,7 @@
 from django.http import JsonResponse
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.views.decorators.http import require_POST, require_GET
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 from .models import Account, Position, JobApplication
 import json
@@ -61,25 +61,14 @@ def register_view(request):
     return JsonResponse({'message': 'Registration successful'}, status=201)
 
 @csrf_exempt
-@require_POST
-def logout_view(request):
-    data = json.loads(request.body)
-    refresh_token = data.get('refresh')
-    try:
-        RefreshToken(refresh_token).blacklist()
-        return JsonResponse({'message': 'Logout successful'}, status=200)
-    except TokenError:
-        return JsonResponse({'message': 'Invalid token'}, status=400)
-
-@csrf_exempt
 @require_GET
 def is_authenticated_view(request):
     auth_header = request.headers.get('Authorization')
     if auth_header and auth_header.startswith('Bearer '):
         token = auth_header.split(' ')[1]
         try:
-            access_token = RefreshToken(token)
-            return JsonResponse({'token': str(access_token)}, status=200)
+            access_token = AccessToken(token) 
+            return JsonResponse({'access': str(access_token)}, status=200)
         except TokenError:
             return JsonResponse({'message': 'Invalid token'}, status=401)
     return JsonResponse({'message': 'No token provided'}, status=401)

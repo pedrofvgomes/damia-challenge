@@ -3,7 +3,8 @@ import axios from 'axios';
 
 class Store {
     user = null;
-    token = null;
+    accessToken = null;
+    refreshToken = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -14,19 +15,34 @@ class Store {
         this.user = user;
     }
 
-    setToken(token) {
-        this.token = token;
+    setAccessToken(token) {
+        this.accessToken = token;
         sessionStorage.setItem('token', token);
+    }
+
+    setRefreshToken(token) {
+        this.refreshToken = token;
     }
 
     clearAuth() {
         this.user = null;
-        this.token = null;
+        this.accessToken = null;
+        this.refreshToken = null;
         sessionStorage.removeItem('token');
     }
 
-    isAuthenticated() {
-        return true
+    async isAuthenticated() {
+        try {
+            const response = await axios.get('http://localhost:8000/api/is_authenticated/', {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`
+                }
+            });
+
+            return response.status === 200;
+        } catch (error) {
+            return false;
+        }
     }
 }
 

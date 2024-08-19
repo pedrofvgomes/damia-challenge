@@ -9,13 +9,11 @@ import './App.css';
 const Authentication = observer(() => {
     const [isLogin, setIsLogin] = React.useState(true);
     const navigate = useNavigate();
-    const isAuthenticated = store.isAuthenticated();
 
     useEffect(() => {
-        if(isAuthenticated) {
+        if(sessionStorage.getItem('token') !== null)
             navigate('/');
-        }
-    }, [isAuthenticated, navigate]);
+    }, []);
 
     const validate = values => {
         const errors = {};
@@ -43,7 +41,8 @@ const Authentication = observer(() => {
         axios.post(`http://localhost:8000${endpoint}`, data)
             .then(response => {
                 if (response.status === 200 || response.status === 201) {
-                    store.setToken(response.data.access);
+                    store.setAccessToken(response.data.access);
+                    store.setRefreshToken(response.data.refresh);
                     axios.get(`http://localhost:8000/api/user/?username=${values.username}`, {
                         headers: {
                             'Authorization': `Bearer ${response.data.access}`,

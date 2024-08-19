@@ -3,25 +3,14 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import UserAvatar from './UserAvatar'
 import { Button } from '@mui/material'
 import store from './store'
-import Logout from "./Logout"
+import { observer } from "mobx-react-lite"
 
-const Layout = () => {
+const Layout = observer(() => {
     const navigate = useNavigate();
 
     let title = window.location.pathname.replace('/', '');
     if (title === '')
         title = 'dashboard';
-
-    useEffect(() => {
-        function validate() {
-            let isAuthenticated = store.isAuthenticated();
-
-            if (!isAuthenticated)
-                navigate('/authentication');
-        }
-
-        validate();
-    }, [])
 
     const links = [
         'dashboard',
@@ -39,6 +28,11 @@ const Layout = () => {
         })
     }
 
+    useEffect(() => {
+        if (sessionStorage.getItem('token') === null)
+            navigate('/authentication')
+    }, []);
+
     return (
         <div id="layout">
             <nav>
@@ -50,7 +44,15 @@ const Layout = () => {
                 {renderLinks()}
 
                 <UserAvatar />
-                <Logout />
+                <Button
+                    variant="contained"
+                    onClick={() => {
+                        store.clearAuth()
+                        navigate('/authentication')
+                    }}
+                >
+                    Logout
+                </Button>
             </nav>
 
             <main id={title}>
@@ -62,6 +64,6 @@ const Layout = () => {
             </main>
         </div>
     )
-}
+});
 
 export default Layout
