@@ -1,71 +1,62 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Formik } from 'formik';
 import axios from 'axios';
+import { observer } from 'mobx-react-lite';
+import store from './store';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 
-// workaround for Django CSRF token
-function getCsrfToken() {
-    const name = 'csrftoken=';
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        let cookie = cookies[i].trim();
-        if (cookie.indexOf(name) === 0) {
-            return cookie.substring(name.length, cookie.length);
-        }
-    }
-    return null;
-}
-
-const Authentication = () => {
+const Authentication = observer(() => {
     const [isLogin, setIsLogin] = React.useState(true);
+    const navigate = useNavigate();
+    const isAuthenticated = store.isAuthenticated();
 
-    // Validation function
+    useEffect(() => {
+        if(isAuthenticated) {
+            navigate('/');
+        }
+    }, [isAuthenticated, navigate]);
+
     const validate = values => {
         const errors = {};
 
         if (isLogin) {
-            // Login validation
             if (!values.username) errors.username = 'Required';
-            else if (
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.username) &&
-                !/^[a-zA-Z0-9_]+$/.test(values.username)
-            ) errors.username = 'Invalid username.';
-
             if (!values.password) errors.password = 'Required';
-            else if (values.password.length < 8) errors.password = 'Password must be at least 8 characters long';
         } else {
-            // Registration validation
             if (!values.username) errors.username = 'Required';
-            else if (!/^[a-zA-Z0-9_]+$/.test(values.username)) errors.username = 'Invalid username.';
             if (!values.password) errors.password = 'Required';
-            else if (values.password.length < 8) errors.password = 'Password must be at least 8 characters long';
-
             if (!values.confirmPassword) errors.confirmPassword = 'Required';
-            else if (values.confirmPassword.length < 8) errors.confirmPassword = 'Password must be at least 8 characters long';
-            else if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+            if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
         }
 
         return errors;
     };
 
-    // Submit handler
     const handleSubmit = (values, { setSubmitting }) => {
         axios.defaults.withCredentials = true;
 
         const endpoint = isLogin ? '/api/login/' : '/api/register/';
-        let data = {
-            username: values.username,
-            password: values.password,
-        };
+        let data = { username: values.username, password: values.password };
         if (!isLogin) data.confirm_password = values.confirmPassword;
 
-        axios.post(`http://localhost:8000${endpoint}`, data, {
-            headers: {
-                'X-CSRFToken': getCsrfToken(),
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(response => alert('Success: ' + response.data.message))
+        axios.post(`http://localhost:8000${endpoint}`, data)
+            .then(response => {
+                if (response.status === 200 || response.status === 201) {
+                    store.setToken(response.data.access);
+                    axios.get(`http://localhost:8000/api/user/?username=${values.username}`, {
+                        headers: {
+                            'Authorization': `Bearer ${response.data.access}`,
+                        }
+                    })
+                        .then(response => {
+                            if (response.status === 200) {
+                                store.setUser(response.data);
+                                navigate('/');
+                            }
+                        })
+                }
+            })
             .catch(error => alert('Error: ' + error.response?.data?.error || 'An error occurred'))
             .finally(() => setSubmitting(false));
     };
@@ -172,8 +163,8 @@ const Authentication = () => {
                                 {isLogin ? 'Need to create an account?' : 'Already have an account?'}
                                 <span
                                     onClick={() => {
-                                        resetForm()
-                                        setIsLogin(!isLogin)
+                                        resetForm();
+                                        setIsLogin(!isLogin);
                                     }}
                                     style={{ cursor: 'pointer', color: 'blue' }}
                                 >
@@ -186,6 +177,6 @@ const Authentication = () => {
             </div>
         </main>
     );
-};
+});
 
 export default Authentication;

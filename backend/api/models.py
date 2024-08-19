@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+import json
 
 ACCOUNT_TYPE_CHOICES = (
     ('client', 'Client'),
@@ -49,11 +50,20 @@ class Account(AbstractUser):
         help_text='Specific permissions for this user.'
     )
     
+    def to_json(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'user_type': self.user_type,
+            'name': f'{self.first_name} {self.last_name}'
+        }
+
 """
 This model represents a client, for instance, a company that's 
 using our service.
 
-Every recruiter and job opening will be associated to an instance 
+Every recruiter and job position will be associated to an instance 
 of Client.
 """
 class Client(models.Model):
@@ -66,7 +76,7 @@ class Client(models.Model):
 """
 This model represents a recruiter, which is associated to a Client.
 
-Job openings will be associated to a recruiter.
+Job positions will be associated to a recruiter.
 """
 class Recruiter(models.Model):
     # account the recruiter is associated to
@@ -89,25 +99,28 @@ class Candidate(models.Model):
     # custom fields
 
 """
-Each job opening is associated to a recruiter, by whom it was posted,
+Each position is associated to a recruiter, by whom it was posted,
 which is then associated to a client.
 """    
-class JobOpening(models.Model):
-    # recruiter the opening is associated to
+class Position(models.Model):
+    # recruiter the position is associated to
     recruiter = models.ForeignKey(Recruiter, on_delete=models.CASCADE)
     
     # custom fields
     title = models.CharField(max_length=255)
     description = models.TextField()
     timestamp = models.DateTimeField()
-
+    location = models.CharField(max_length=255)
+    salary_min = models.DecimalField(max_digits=10, decimal_places=2)
+    salary_max = models.DecimalField(max_digits=10, decimal_places=2)
+    
 """
 This model represents a job application made by a candidate 
-for a specific job opening.
+for a specific job position.
 """
 class JobApplication(models.Model):
-    # job opening the application is for
-    job_opening = models.ForeignKey(JobOpening, on_delete=models.CASCADE)
+    # job position the application is for
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
     
     # candidate the application was made by
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
