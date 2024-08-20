@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { statuses } from "./Application";
 
 const Candidates = () => {
     const headers = [
@@ -115,7 +116,7 @@ const Candidates = () => {
                         >
                             <span>{candidate.name}</span>
                             <span>{candidate.position.name}</span>
-                            <span>{candidate.status.charAt(0).toUpperCase() + candidate.status.slice(1)}</span>
+                            <span>{statuses.find(s => s[0] === candidate.status)[1]}</span>
                             <span>{new Date(candidate.lastStatusUpdate).toLocaleDateString()}</span>
                         </div>
                     );
@@ -126,7 +127,7 @@ const Candidates = () => {
 
     return (
         <div>
-            <div>
+                <div>
                 {drawHeader()}
                 {drawCandidates()}
             </div>

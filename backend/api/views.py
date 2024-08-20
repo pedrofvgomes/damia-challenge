@@ -2,8 +2,9 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from .models import Account, Position, JobApplication, Client, Recruiter
+from .models import Account, Position, JobApplication, Client, Recruiter, ApplicationStatus, Candidate
 import json
+from django.utils import timezone
 
 @csrf_exempt
 @require_POST
@@ -246,3 +247,114 @@ def delete_position(request, position_id):
     position.delete()
     
     return JsonResponse({'message': 'Position deleted successfully'}, status=200)
+
+def get_application(request, id):
+    candidate_id, position_id = id.split('-')
+    
+    try:
+        application = JobApplication.objects.get(candidate__id=candidate_id, position__id=position_id)
+    except JobApplication.DoesNotExist:
+        return JsonResponse({'error': 'Application not found.'}, status=404)
+    
+    application_json = {
+        'candidate': {
+            'id': application.candidate.id,
+            'name': f'{application.candidate.account.first_name} {application.candidate.account.last_name}',
+            'email': application.candidate.account.email
+        },
+        'position': {
+            'id': application.position.id,
+            'name': application.position.title
+        },
+        'statuses': [{
+            'id': status.id,
+            'status': status.status,
+            'timestamp': status.timestamp
+        } for status in application.statuses.all()],
+        'recruiter': {
+            'id': application.position.recruiter.id,
+            'name': f'{application.position.recruiter.account.first_name} {application.position.recruiter.account.last_name}',
+            'email': application.position.recruiter.account.email
+        },
+        'resume': request.build_absolute_uri(application.resume.url) if application.resume else None,
+        'cover_letter': application.cover_letter
+    }
+    
+    return JsonResponse({'application': application_json}, status=200)
+
+@require_POST
+@csrf_exempt
+def add_status(request):
+    """
+    Adds a status to a job application.
+    """
+    data = json.loads(request.body)
+    candidate_id = data.get('candidate_id')
+    position_id = data.get('position_id')
+    status = data.get('status')
+    
+    try:
+        application = JobApplication.objects.get(candidate__id=candidate_id, position__id=position_id)
+    except JobApplication.DoesNotExist:
+        return JsonResponse({'error': 'Application not found.'}, status=404)
+    
+    application_status = ApplicationStatus.objects.create(status=status, timestamp=timezone.now())
+    application_status.save()
+    
+    application.statuses.add(application_status)
+    application.save()
+    
+    return JsonResponse({'message': 'Status added successfully'}, status=200)
+
+@csrf_exempt
+def delete_status(request, status_id):
+    """
+    Deletes a status.
+    """
+    
+    try:
+        status = ApplicationStatus.objects.get(id=status_id)
+    except ApplicationStatus.DoesNotExist:
+        return JsonResponse({'error': 'Status not found.'}, status=404)
+    
+    status.delete()
+    
+    return JsonResponse({'message': 'Status deleted successfully'}, status=200)
+
+@require_POST
+@csrf_exempt
+def apply(request):
+    """
+    Handles job applications. Creates a new job application and returns a success message.
+    """
+    try:
+        position_id = request.POST.get('position_id')
+        cover_letter = request.POST.get('cover_letter')
+        resume = request.FILES.get('resume') 
+
+        candidate = Account.objects.get(username='candidate1_1')
+        position = Position.objects.get(id=position_id)
+
+        job_application = JobApplication.objects.create(
+            position=position,
+            candidate=Candidate.objects.get(account=candidate),
+            resume=resume,
+            cover_letter=cover_letter
+        )
+        
+        initial_status = ApplicationStatus.objects.create(
+            status='received', 
+            timestamp=timezone.now()
+        )
+        job_application.statuses.add(initial_status)
+        job_application.save()
+        
+        # save the uploaded file
+        with open(f'media/resumes/{resume.name}', 'wb+') as destination:
+            for chunk in resume.chunks():
+                destination.write(chunk)
+
+        return JsonResponse({'message': 'Application submitted successfully'}, status=201)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

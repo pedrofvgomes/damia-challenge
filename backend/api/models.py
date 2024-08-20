@@ -33,7 +33,7 @@ user will associate.
 It inherits from Django's AbstractUser, which makes the job easier.
 """
 class Account(AbstractUser):
-    user_type = models.CharField(max_length=50, choices=ACCOUNT_TYPE_CHOICES)
+    user_type = models.CharField(max_length=50, choices=ACCOUNT_TYPE_CHOICES, default='candidate')
     
     # Add related_name to resolve clashes
     groups = models.ManyToManyField(
@@ -129,6 +129,8 @@ class JobApplication(models.Model):
     
     # custom fields
     statuses = models.ManyToManyField('ApplicationStatus', related_name='applications')
+    resume = models.FileField(upload_to='resumes/', null=True)
+    cover_letter = models.TextField(default='')
 
 """
 Every application status update will be stored in an instance of this model.

@@ -18,9 +18,8 @@ const Layout = () => {
         title = 'dashboard';
 
     const links = [
-        'dashboard',
-        'recruiters',
         'candidates',
+        'recruiters',
         'positions',
         'create'
     ]
@@ -45,9 +44,6 @@ const Layout = () => {
             .catch(error => {
                 console.error("Error fetching user:", error);
             });
-
-        if (sessionStorage.getItem('token') === null)
-            navigate('/authentication')
     }, []);
 
     return (

@@ -13,4 +13,8 @@ urlpatterns = [
     path('positions/<int:position_id>/', views.get_position, name='position'),
     path('delete-position/<int:position_id>/', views.delete_position, name='delete_position'),
     path('candidates/', views.get_candidates, name='candidates'),
+    path('applications/<str:id>/', views.get_application, name='application'),
+    path('add-status/', views.add_status, name='add_status'),
+    path('delete-status/<str:status_id>/', views.delete_status, name='status'),
+    path('apply/', views.apply, name='apply'),
 ]

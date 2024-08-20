@@ -9,8 +9,7 @@ const Authentication = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (sessionStorage.getItem('token') !== null)
-            navigate('/');
+        
     }, []);
 
     const validate = values => {
@@ -41,7 +40,6 @@ const Authentication = () => {
                 if (response.status === 200 || response.status === 201) {
                     if (isLogin)
                         navigate('/');
-                    
                 }
             })
             .catch(error => alert('Error: ' + error.response?.data?.error || 'An error occurred'))
