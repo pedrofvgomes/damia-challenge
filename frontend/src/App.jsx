@@ -10,19 +10,21 @@ import ApplicationForm from './ApplicationForm';
 import Create from './Create';
 
 const App = () => {
+  const [whereToRedirect, setWhereToRedirect] = React.useState('/');
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path='/authentication' element={<Authentication />} />
-        <Route path='*' element={<Layout />}>
-          <Route index element={<Navigate to='/candidates' />} />
+        <Route path='*' element={<Layout setWhereToRedirect={setWhereToRedirect} />}>
+          <Route index element={<Navigate to={whereToRedirect} />} />
           <Route path='recruiters' element={<Recruiters />} />
           <Route path='candidates' element={<Candidates />} />
           <Route path='applications/:id' element={<Application />} />
           <Route path='positions' element={<Positions />} />
           <Route path='apply/:id' element={<ApplicationForm />} />
           <Route path='create' element={<Create />} />
-          <Route path='*' element={<Navigate to='/' />} />
+          <Route path='*' element={<Navigate to={whereToRedirect} />} />
         </Route>
       </Routes>
     </BrowserRouter>

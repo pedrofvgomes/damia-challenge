@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react"
-import { Outlet, useNavigate } from 'react-router-dom'
-import { Button } from '@mui/material'
+import React, { useEffect, useState } from "react";
+import { Outlet, useNavigate } from 'react-router-dom';
+import { Button } from '@mui/material';
 import axios from "axios";
 
-const Layout = () => {
+const Layout = (props) => {
     const [user, setUser] = useState({
         username: '',
         name: '',
@@ -13,38 +13,78 @@ const Layout = () => {
 
     const navigate = useNavigate();
 
-    let title = window.location.pathname.replace('/', '');
-    if (title === '')
-        title = 'dashboard';
+    const title = window.location.pathname.replace('/', '') || 'dashboard';
 
-    const links = [
-        'candidates',
-        'recruiters',
-        'positions',
-        'create'
-    ]
+    const accessibleLinks = {
+        'recruiter': ['positions', 'candidates', 'create'],
+        'candidate': ['positions', 'apply'],
+        'client': ['recruiters', 'positions']
+    };
 
     const renderLinks = () => {
-        return links.map(link => {
+        if(!user?.user_type) return null;
+
+        return accessibleLinks[user.user_type].map(link => {
             const selected = link === title ? 'selected' : '';
 
-            return <a href={`/${link}`} className={selected}>
+            return <a key={link} href={`/${link}`} className={selected}>
                 {link.charAt(0).toUpperCase() + link.slice(1)}
             </a>
-        })
-    }
+        });
+    };
+
+    // Function to check if the user has access to the current page
+    const redirectIfInvalidPage = () => {
+        const currentPath = window.location.pathname.replace('/', '');
+        
+        // Check if user_type exists and if the path is valid for the user type
+        if (user.user_type && accessibleLinks[user.user_type]) {
+            const validPaths = accessibleLinks[user.user_type];
+            
+            // If the current path is not in validPaths, redirect to home
+            if (!validPaths.includes(currentPath) && currentPath !== '') {
+                navigate('/');
+            }
+        }
+    };
 
     useEffect(() => {
+        // Fetch the user data on mount
         axios.get('http://localhost:8000/api/user')
             .then(response => {
                 if (response.status === 200) {
                     setUser(response.data.user);
+                    
+                    let redirect = '/';
+                    switch (response.data.user.user_type) {
+                        case 'recruiter':
+                            redirect = '/positions';
+                            break;
+                        case 'candidate':
+                            redirect = '/positions';
+                            break;
+                        case 'client':
+                            redirect = '/recruiters';
+                            break;
+                        default:
+                            break;
+                    }
+
+                    props.setWhereToRedirect(redirect);
+
                 }
             })
             .catch(error => {
                 console.error("Error fetching user:", error);
             });
     }, []);
+
+    useEffect(() => {
+        // Check for valid page access after user data is loaded
+        if (user.user_type) {
+            redirectIfInvalidPage();
+        }
+    }, [user]);
 
     return (
         <div id="layout">
@@ -64,7 +104,7 @@ const Layout = () => {
                 <Button
                     variant="contained"
                     onClick={() => {
-                        navigate('/authentication')
+                        navigate('/authentication');
                     }}
                 >
                     Logout
@@ -74,8 +114,8 @@ const Layout = () => {
             <main id={title}>
                 <Outlet />
             </main>
-        </div >
-    )
+        </div>
+    );
 }
 
-export default Layout
+export default Layout;
