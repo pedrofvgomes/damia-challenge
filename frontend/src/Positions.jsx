@@ -16,15 +16,7 @@ const Positions = observer(() => {
     const [direction, setDirection] = useState('asc');
 
     // positions to be displayed in a list
-    const [positions, setPositions] = useState([
-        {
-            id: 1,
-            name: 'Software Engineer',
-            location: 'San Francisco, CA',
-            datePosted: '10/10/2021',
-            numberOfApplicants: 10
-        }
-    ]);
+    const [positions, setPositions] = useState([]);
 
     useEffect(() => {
         axios.get('http://localhost:8000/api/positions')
@@ -112,7 +104,12 @@ const Positions = observer(() => {
             <div id="positions-list">
                 {positions.map(position => {
                     return (
-                        <div className='position'>
+                        <div
+                            className='position'
+                            onClick={() => {
+                                window.location.href = `/positions/${position.id}`;
+                            }}
+                        >
                             <span>{position.name}</span>
                             <span>{position.location}</span>
                             <span>{position.datePosted.split('T')[0].split('-').reverse().join('/')}</span>

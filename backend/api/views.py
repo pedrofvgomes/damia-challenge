@@ -79,7 +79,6 @@ def get_client(request):
     
     return JsonResponse({'client': client_json}, status=200)
 
-
 def get_positions(request):
     """
     Returns the list of positions for the authenticated recruiter.
@@ -97,3 +96,74 @@ def get_positions(request):
     } for position in positions]
 
     return JsonResponse({'positions': positions_json}, status=200)
+
+def get_position(request, position_id):
+    """
+    Returns the position's information.
+    """
+
+    try:
+        position = Position.objects.get(id=position_id)
+    except Position.DoesNotExist:
+        return JsonResponse({'error': 'Position not found.'}, status=404)
+    
+    position_json = {
+        'id': position.id,
+        'name': position.title,
+        'description': position.description,
+        'location': position.location,
+        'datePosted': position.timestamp,
+        'numberOfApplicants': JobApplication.objects.filter(position=position).count(),
+        'salary': f'${position.salary_min} - ${position.salary_max}',
+        'recruiter': {
+            'id': position.recruiter.id,
+            'name': f'{position.recruiter.account.first_name} {position.recruiter.account.last_name}',
+            'email': position.recruiter.account.email
+        },
+        'client': {
+            'id': position.recruiter.client.id,
+            'name': f'{position.recruiter.client.account.first_name} {position.recruiter.client.account.last_name}',
+            'email': position.recruiter.client.account.email
+        },
+        'candidates': [{
+            'id': application.candidate.id,
+            'name': f'{application.candidate.account.first_name} {application.candidate.account.last_name}',
+            'email': application.candidate.account.email,
+            'statuses': [{
+                'status': status.status,
+                'timestamp': status.timestamp
+            } for status in application.statuses.all()]
+        } for application in JobApplication.objects.filter(position=position)]
+    }
+    
+    return JsonResponse({'position': position_json}, status=200)
+
+def get_candidates(request):
+    """
+    Returns the list of candidates for the authenticated recruiter, along with their positions, status, and last status update.
+    """
+    # Assume the user is authenticated via session for now
+    recruiter = Recruiter.objects.get(account=Account.objects.get(username='recruiter2_1'))
+    
+    # Get all positions associated with the recruiter
+    positions = Position.objects.filter(recruiter=recruiter)
+    
+    candidates_json = []
+    
+    for position in positions:
+        # Get all job applications for this position
+        applications = JobApplication.objects.filter(position=position).select_related('candidate', 'position')
+        
+        for application in applications:
+            # Fetch the most recent status update for the candidate
+            latest_status = application.statuses.order_by('-timestamp').first()
+            
+            candidates_json.append({
+                'id': application.candidate.id,
+                'name': f'{application.candidate.account.first_name} {application.candidate.account.last_name}',
+                'position': position.title,
+                'status': latest_status.status,
+                'lastStatusUpdate': latest_status.timestamp
+            })
+    
+    return JsonResponse({'candidates': candidates_json}, status=200)
