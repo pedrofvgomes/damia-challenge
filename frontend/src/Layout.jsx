@@ -22,7 +22,7 @@ const Layout = (props) => {
     };
 
     const renderLinks = () => {
-        if(!user?.user_type) return null;
+        if (!user?.user_type) return null;
 
         return accessibleLinks[user.user_type].map(link => {
             const selected = link === title ? 'selected' : '';
@@ -36,11 +36,11 @@ const Layout = (props) => {
     // Function to check if the user has access to the current page
     const redirectIfInvalidPage = () => {
         const currentPath = window.location.pathname.replace('/', '');
-        
+
         // Check if user_type exists and if the path is valid for the user type
         if (user.user_type && accessibleLinks[user.user_type]) {
             const validPaths = accessibleLinks[user.user_type];
-            
+
             // If the current path is not in validPaths, redirect to home
             if (!validPaths.includes(currentPath) && currentPath !== '') {
                 navigate('/');
@@ -49,12 +49,14 @@ const Layout = (props) => {
     };
 
     useEffect(() => {
-        // Fetch the user data on mount
+        if (!sessionStorage.getItem('token'))
+            navigate('/authentication');
+
         axios.get('http://localhost:8000/api/user')
             .then(response => {
                 if (response.status === 200) {
                     setUser(response.data.user);
-                    
+
                     let redirect = '/';
                     switch (response.data.user.user_type) {
                         case 'recruiter':
@@ -104,6 +106,7 @@ const Layout = (props) => {
                 <Button
                     variant="contained"
                     onClick={() => {
+                        sessionStorage.removeItem('token');
                         navigate('/authentication');
                     }}
                 >

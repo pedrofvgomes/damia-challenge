@@ -8,6 +8,19 @@ import Recruiters from './Recruiters';
 import Application from './Application';
 import ApplicationForm from './ApplicationForm';
 import Create from './Create';
+import axios from 'axios';
+
+// interceptor for axios to use the token
+axios.interceptors.request.use(
+  config => {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = token;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+)
 
 const App = () => {
   const [whereToRedirect, setWhereToRedirect] = React.useState('/');

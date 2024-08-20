@@ -5,12 +5,41 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Account, Position, JobApplication, Client, Recruiter, ApplicationStatus, Candidate
 import json
 from django.utils import timezone
+import uuid
+
+# this is where tokens are stored
+# beware: this is not a good practice in a production environment
+TOKEN_STORAGE = {}
+
+def get_authenticated_user(request):
+    """
+    Returns the authenticated user based on the token.
+    """
+    
+    token = request.headers.get('Authorization')
+    username = TOKEN_STORAGE.get(token)
+    
+    if username is not None:
+        return Account.objects.get(username=username)
+    
+    return None
+    
+# the decorator we'll use to restrict access based on user type
+def user_type_required(user_type):
+    def decorator(view_func):
+        def _wrapped_view(request, *args, **kwargs):
+            user = get_authenticated_user(request)
+            if user and user.user_type == user_type:
+                return view_func(request, *args, **kwargs)
+            return JsonResponse({'message': 'Forbidden'}, status=403)
+        return _wrapped_view
+    return decorator
 
 @csrf_exempt
 @require_POST
 def login_view(request):
     """
-    Handles user login. Authenticates the user.
+    Handles user login. Authenticates the user and returns a token.
     """
     data = json.loads(request.body)
     username = data.get('username')
@@ -20,7 +49,9 @@ def login_view(request):
 
     if user is not None:
         login(request, user)
-        return JsonResponse({'message': 'Login successful'}, status=200)
+        token = str(uuid.uuid4())
+        TOKEN_STORAGE[token] = user.username
+        return JsonResponse({'token': token}, status=200)
     else:
         return JsonResponse({'message': 'Invalid credentials'}, status=400)
 

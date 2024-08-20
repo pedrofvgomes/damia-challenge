@@ -8,7 +8,11 @@ const Authentication = () => {
     const [isLogin, setIsLogin] = React.useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {}, []);
+    useEffect(() => {
+        if (sessionStorage.getItem('token')) {
+            navigate('/');
+        }
+    }, []);
 
     const validate = values => {
         const errors = {};
@@ -47,10 +51,11 @@ const Authentication = () => {
         axios.post(`http://localhost:8000${endpoint}`, data)
             .then(response => {
                 if (response.status === 200 || response.status === 201) {
-                    if (isLogin)
-                        alert('Logged in successfully');
-                    else
-                        alert('Account created successfully');
+                    if (isLogin){
+                        alert('Login successful');
+                        sessionStorage.setItem('token', response.data.token);
+                    }
+                    else alert('Account created successfully');
                     
                     navigate('/');
                 }
