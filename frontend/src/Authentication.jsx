@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
 import { Formik } from 'formik';
 import axios from 'axios';
-import { observer } from 'mobx-react-lite';
-import store from './store';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
-const Authentication = observer(() => {
+const Authentication = () => {
     const [isLogin, setIsLogin] = React.useState(true);
     const navigate = useNavigate();
 
@@ -41,8 +39,6 @@ const Authentication = observer(() => {
         axios.post(`http://localhost:8000${endpoint}`, data)
             .then(response => {
                 if (response.status === 200 || response.status === 201) {
-                    store.setAccessToken(response.data.access);
-                    store.setRefreshToken(response.data.refresh);
                     if (isLogin)
                         navigate('/');
                     
@@ -168,6 +164,6 @@ const Authentication = observer(() => {
             </div>
         </main>
     );
-});
+}
 
 export default Authentication;

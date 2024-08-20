@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { observer } from "mobx-react-lite";
 import axios from "axios";
 
-const Candidates = observer(() => {
+const Candidates = () => {
     const headers = [
         'Name',
         'Position',
@@ -22,7 +21,6 @@ const Candidates = observer(() => {
         axios.get('http://localhost:8000/api/candidates')
             .then(response => {
                 if (response.status === 200) {
-                    console.log(response.data.candidates);
                     setCandidates(response.data.candidates);
                 }
             })
@@ -131,6 +129,6 @@ const Candidates = observer(() => {
             </div>
         </div>
     );
-});
+}
 
 export default Candidates;

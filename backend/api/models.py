@@ -85,7 +85,7 @@ class Recruiter(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
     
     # client the recruiter is associated to
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True)
     
     # custom fields
     

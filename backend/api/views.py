@@ -54,31 +54,6 @@ def register_view(request):
     
     return JsonResponse({'message': 'Registration successful'}, status=201)
 
-
-def get_client(request):
-    """
-    Returns the client's information.
-    """
-    # Assume the user is authenticated via session for now
-    user = request.user
-
-    try:
-        client = Client.objects.get(account=user)
-    except Client.DoesNotExist:
-        return JsonResponse({'error': 'Client not found.'}, status=404)
-
-    client_json = {
-        'id': client.id,
-        'username': client.account.username,
-        'name': f'{client.account.first_name} {client.account.last_name}',
-        'email': client.account.email,
-        'location': client.location,
-        'website': client.website,
-        'phone': client.phone
-    }
-    
-    return JsonResponse({'client': client_json}, status=200)
-
 def get_positions(request):
     """
     Returns the list of positions for the authenticated recruiter.
@@ -167,3 +142,89 @@ def get_candidates(request):
             })
     
     return JsonResponse({'candidates': candidates_json}, status=200)
+
+def get_recruiters(request):
+    search = request.GET.get('search', None)
+    recruiters_json = []
+    
+    """
+    Returns the list of recruiters for the authenticated client.
+    
+    If the search parameter is provided, returns the list of recruiters that match the search query
+    and that are not associated to any client.
+    """
+    # Assume the user is authenticated via session for now
+    client = Client.objects.get(account=Account.objects.get(username='client1'))
+    
+    if search is None:
+        recruiters = Recruiter.objects.filter(client=client)
+        recruiters_json = [{
+            'id': recruiter.id,
+            'name': f'{recruiter.account.first_name} {recruiter.account.last_name}',
+            'email': recruiter.account.email
+        } for recruiter in recruiters]
+    else:
+        # the recruiter can't 
+        recruiters = Recruiter.objects.filter(account__username__icontains=search, client=None)
+        recruiters_json = [{
+            'id': recruiter.id,
+            'name': f'{recruiter.account.first_name} {recruiter.account.last_name}',
+            'email': recruiter.account.email
+        } for recruiter in recruiters]
+        
+    return JsonResponse({'recruiters': recruiters_json}, status=200)
+
+@csrf_exempt
+@require_POST
+def add_recruiters(request):
+    """
+    Adds recruiters to the client's account.
+    """
+    data = json.loads(request.body)
+    print(data)
+    recruiter_ids = data.get('recruiterIds')
+    
+    # Assume the user is authenticated via session for now
+    client = Client.objects.get(account=Account.objects.get(username='client1'))
+    
+    for recruiter_id in recruiter_ids:
+        recruiter = Recruiter.objects.get(id=recruiter_id)
+        recruiter.client = client
+        recruiter.save()
+    
+    return JsonResponse({'message': 'Recruiters added successfully'}, status=200)
+
+def get_user(request):
+    """
+    Returns the authenticated user's information.
+    """
+    # Assume the user is authenticated via session for now
+    user = Account.objects.get(username='recruiter2_1')
+    
+    user_json = {
+        'id': user.id,
+        'username': user.username,
+        'name': f'{user.first_name} {user.last_name}',
+        'email': user.email,
+        'user_type': user.user_type
+    }
+    
+    return JsonResponse({'user': user_json}, status=200)
+
+@require_POST
+@csrf_exempt
+def remove_recruiter(request):
+    """
+    Removes a recruiter from the client's account.
+    """
+    data = json.loads(request.body)
+    recruiter_id = data.get('recruiter_id')
+    
+    # Assume the user is authenticated via session for now
+    client = Client.objects.get(account=Account.objects.get(username='client1'))
+    
+    recruiter = Recruiter.objects.get(id=recruiter_id)
+    recruiter.client = None
+    recruiter.save()
+    
+    return JsonResponse({'message': 'Recruiter removed successfully'}, status=200)

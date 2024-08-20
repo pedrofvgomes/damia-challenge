@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { observer } from "mobx-react-lite";
 import axios from "axios";
 
-const Position = observer(() => {
+const Position = () => {
     const [position, setPosition] = React.useState({});
 
     useEffect(() => {
@@ -13,14 +12,13 @@ const Position = observer(() => {
         axios.get(`http://localhost:8000/api/positions/${id}`)
             .then(response => {
                 if (response.status === 200) {
-                    console.log(response.data.position);
-                    // set position
+                    setPosition(response.data.position);
                 }
             });
     }, []);
 
     return (
-        <div>
+        <div id="position">
             <h1>Position</h1>
             <p>{position.name}</p>
             <p>{position.location}</p>
@@ -28,6 +26,6 @@ const Position = observer(() => {
             <p>{position.numberOfApplicants}</p>
         </div>
     );
-})
+}
 
 export default Position;

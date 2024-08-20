@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { observer } from "mobx-react-lite";
 import axios from "axios";
 
-const Positions = observer(() => {
+const Positions = () => {
     const headers = [
         'Name',
         'Location',
@@ -22,7 +21,6 @@ const Positions = observer(() => {
         axios.get('http://localhost:8000/api/positions')
             .then(response => {
                 if (response.status === 200) {
-                    console.log(response.data.positions);
                     setPositions(response.data.positions);
                 }
             })
@@ -130,6 +128,6 @@ const Positions = observer(() => {
 
         </div>
     );
-});
+};
 
 export default Positions;

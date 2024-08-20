@@ -1,11 +1,16 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { Outlet, useNavigate } from 'react-router-dom'
-import UserAvatar from './UserAvatar'
 import { Button } from '@mui/material'
-import store from './store'
-import { observer } from "mobx-react-lite"
+import axios from "axios";
 
-const Layout = observer(() => {
+const Layout = () => {
+    const [user, setUser] = useState({
+        username: '',
+        name: '',
+        email: '',
+        user_type: ''
+    });
+
     const navigate = useNavigate();
 
     let title = window.location.pathname.replace('/', '');
@@ -14,6 +19,7 @@ const Layout = observer(() => {
 
     const links = [
         'dashboard',
+        'recruiters',
         'candidates',
         'positions',
         'create'
@@ -30,6 +36,16 @@ const Layout = observer(() => {
     }
 
     useEffect(() => {
+        axios.get('http://localhost:8000/api/user')
+            .then(response => {
+                if (response.status === 200) {
+                    setUser(response.data.user);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching user:", error);
+            });
+
         if (sessionStorage.getItem('token') === null)
             navigate('/authentication')
     }, []);
@@ -44,11 +60,14 @@ const Layout = observer(() => {
                 />
                 {renderLinks()}
 
-                <UserAvatar />
+                <h3 id="user-info">
+                    {user.name && user.user_type && <>
+                        {'Logged in as  '} <strong>{user.username} ({user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)})</strong>
+                    </>}
+                </h3>
                 <Button
                     variant="contained"
                     onClick={() => {
-                        store.clearAuth()
                         navigate('/authentication')
                     }}
                 >
@@ -59,8 +78,8 @@ const Layout = observer(() => {
             <main id={title}>
                 <Outlet />
             </main>
-        </div>
+        </div >
     )
-});
+}
 
 export default Layout

@@ -27,7 +27,8 @@
   background-color: rgb(240, 240, 240);
 }
 
-#authentication form, #complete-profile form {
+#authentication form,
+#complete-profile form {
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -126,31 +127,42 @@
   transition: all 0.1s ease-in;
 }
 
-#layout nav a.selected{
+#layout nav a.selected {
   color: white;
 }
 
-#avatar{
+#user-info {
   margin-left: auto;
+  color: white;
 }
 
-main{
+#user-info strong {
+  font-weight: bold;
+  color: #73d0b9;
+}
+
+main {
   display: flex;
   flex-direction: column;
   padding: 20px;
   background-color: #2f3130;
   height: 100%;
 }
-main > h1:first-child{
+
+main>h1:first-child {
   margin: 0;
   color: #73d0b9;
 }
 
-#positions, #candidates{
+#positions,
+#candidates,
+#recruiters {
   height: 100%;
 }
 
-#positions > div, #candidates > div{
+#positions>div,
+#candidates>div,
+#recruiters>div {
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0px 0px 10px rgba(115, 208, 185, 0.5);
@@ -159,7 +171,8 @@ main > h1:first-child{
   margin-top: 20px;
   background-color: lightgray;
 }
-#headers{
+
+#headers {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -169,7 +182,8 @@ main > h1:first-child{
   height: 10%;
   border-bottom: solid 1px #73d0b9;
 }
-#headers > *{
+
+#headers>* {
   width: 25%;
   color: #73d0b9;
   font-weight: bold;
@@ -182,23 +196,30 @@ main > h1:first-child{
   align-items: center;
   position: relative;
 }
-#headers > *:hover{
+
+#headers>*:hover {
   cursor: pointer;
   background-color: #73d0b9 !important;
   color: white !important;
   transition: all 0.1s ease-in;
 }
-#headers > span > span{
+
+#headers>span>span {
   font-size: 15px;
   position: absolute;
   right: 20px;
 }
 
-#positions-list, #candidates-list{
+#positions-list,
+#candidates-list,
+#recruiters-list {
   overflow: auto;
   height: 75vh;
 }
-.position, .candidate {
+
+.position,
+.candidate,
+.recruiter {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -207,14 +228,23 @@ main > h1:first-child{
   background-color: white;
   width: 100%;
 }
-.position:hover, .candidate:hover{
+
+.position:hover,
+.candidate:hover,
+.recruiter:hover {
   cursor: pointer;
   background-color: rgba(115, 208, 185, 0.5);
 }
-.position:hover > *, .candidate:hover > *{  
+
+.position:hover>*,
+.candidate:hover>*,
+.recruiter:hover>* {
   color: white;
 }
-.position > *, .candidate > *{
+
+.position>*,
+.candidate>*,
+.recruiter>* {
   width: 25%;
   display: flex;
   flex-direction: row;
@@ -223,11 +253,82 @@ main > h1:first-child{
   padding: 20px 10px;
   color: #2f3130;
   font-size: 18px;
+  word-wrap: break-word;
 }
 
-#complete-profile form div{
+#complete-profile form div {
   display: flex;
   flex-direction: row;
   gap: 10px;
   align-self: center;
+}
+
+#headers.recruiter>* {
+  width: 50%;
+}
+
+.recruiter>* {
+  width: 50%;
+}
+
+.remove-recruiter{
+  min-width: 0px !important
+}
+
+.MuiButton-containedPrimary {
+  background-color: #73d0b9 !important;
+  color: white !important;
+  font-weight: bold !important;
+}
+
+#invite-recruiter {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
+#invite-recruiter-modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  align-items: center;
+}
+
+#invite-recruiter-modal h1 {
+  margin: 0;
+  color: #73d0b9;
+}
+
+#invite-recruiter-modal input {
+  padding: 0px 5px;
+  font-size: 15px;
+  border-radius: 10px;
+  outline: none;
+  border: solid 2px #73d0b9;
+}
+
+#invite-recruiter-modal>div {
+  height: 200px;
+  width: 300px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5) inset;
+  border-radius: 10px;
+  overflow: auto;
+}
+
+#invite-recruiter-modal>div>div {
+  padding: 10px;
+  border-bottom: solid 1px lightgrey;
+}
+
+#invite-recruiter-modal>div>div:hover {
+  background-color: rgba(115, 208, 185, 0.5) !important;
+  color: white !important;
 }
