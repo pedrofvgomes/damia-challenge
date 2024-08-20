@@ -24,7 +24,6 @@ def login_view(request):
     else:
         return JsonResponse({'message': 'Invalid credentials'}, status=400)
 
-
 @csrf_exempt
 @require_POST
 def register_view(request):
@@ -33,6 +32,8 @@ def register_view(request):
     """
     data = json.loads(request.body)
     username = data.get('username')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
     email = data.get('email')
     password = data.get('password')
     confirm_password = data.get('confirm_password')
@@ -46,13 +47,18 @@ def register_view(request):
     if Account.objects.filter(email=email).exists():
         return JsonResponse({'message': 'Email already exists'}, status=400)
     
-    account = Account.objects.create_user(username=username, email=email, password=password)
+    account = Account.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name
+    )
     account.save()
-    
-    # Create client by default for the registered user (if needed)
-    client = Client.objects.create(account=account)
-    client.save()
-    
+
+    # Create a candidate for the registered user
+    Candidate.objects.create(account=account)
+
     return JsonResponse({'message': 'Registration successful'}, status=201)
 
 def get_positions(request):
@@ -60,7 +66,7 @@ def get_positions(request):
     Returns the list of positions for the authenticated recruiter.
     """
     # Assume the user is authenticated via session for now
-    recruiter = Recruiter.objects.get(account=Account.objects.get(username='recruiter2_1'))
+    recruiter = Recruiter.objects.get(account=Account.objects.get(username='recruiter2_1')) #fixme
     
     positions = Position.objects.filter(recruiter=recruiter)
     positions_json = [{
@@ -119,7 +125,7 @@ def get_candidates(request):
     Returns the list of candidates for the authenticated recruiter, along with their positions, status, and last status update.
     """
     # Assume the user is authenticated via session for now
-    recruiter = Recruiter.objects.get(account=Account.objects.get(username='recruiter2_1'))
+    recruiter = Recruiter.objects.get(account=Account.objects.get(username='teste123'))#fixme
     
     # Get all positions associated with the recruiter
     positions = Position.objects.filter(recruiter=recruiter)
@@ -158,7 +164,7 @@ def get_recruiters(request):
     and that are not associated to any client.
     """
     # Assume the user is authenticated via session for now
-    client = Client.objects.get(account=Account.objects.get(username='client1'))
+    client = Client.objects.get(account=Account.objects.get(username='teste123'))#fixme
     
     if search is None:
         recruiters = Recruiter.objects.filter(client=client)
@@ -189,11 +195,13 @@ def add_recruiters(request):
     recruiter_ids = data.get('recruiterIds')
     
     # Assume the user is authenticated via session for now
-    client = Client.objects.get(account=Account.objects.get(username='client1'))
+    client = Client.objects.get(account=Account.objects.get(username='teste123')) #fixme
     
     for recruiter_id in recruiter_ids:
         recruiter = Recruiter.objects.get(id=recruiter_id)
         recruiter.client = client
+        recruiter.account.user_type = 'recruiter'
+        Candidate.objects.get(account=recruiter.account).delete()
         recruiter.save()
     
     return JsonResponse({'message': 'Recruiters added successfully'}, status=200)
@@ -203,7 +211,7 @@ def get_user(request):
     Returns the authenticated user's information.
     """
     # Assume the user is authenticated via session for now
-    user = Account.objects.get(username='recruiter2_1')
+    user = Account.objects.get(username='teste123') #fixme
     
     user_json = {
         'id': user.id,
@@ -223,9 +231,6 @@ def remove_recruiter(request):
     """
     data = json.loads(request.body)
     recruiter_id = data.get('recruiter_id')
-    
-    # Assume the user is authenticated via session for now
-    client = Client.objects.get(account=Account.objects.get(username='client1'))
     
     recruiter = Recruiter.objects.get(id=recruiter_id)
     recruiter.client = None
@@ -332,7 +337,7 @@ def apply(request):
         cover_letter = request.POST.get('cover_letter')
         resume = request.FILES.get('resume') 
 
-        candidate = Account.objects.get(username='candidate1_1')
+        candidate = Account.objects.get(username='candidate1_1') #fixme       
         position = Position.objects.get(id=position_id)
 
         job_application = JobApplication.objects.create(
@@ -353,6 +358,11 @@ def apply(request):
         with open(f'media/resumes/{resume.name}', 'wb+') as destination:
             for chunk in resume.chunks():
                 destination.write(chunk)
+                
+        # update the candidate with the documents
+        candidate.resume = resume
+        candidate.cover_letter = cover_letter
+        candidate.save()
 
         return JsonResponse({'message': 'Application submitted successfully'}, status=201)
 
@@ -374,8 +384,8 @@ def create_position(request):
         salary_max = data.get('salary_max')
         description = data.get('description')
         
-        recruiter = Recruiter.objects.get(account=Account.objects.get(username='recruiter2_1'))
-        
+        recruiter = Recruiter.objects.get(account=Account.objects.get(username='teste123')) #fixme
+         
         position = Position.objects.create(
             title=name,
             location=location,

@@ -8,9 +8,7 @@ const Authentication = () => {
     const [isLogin, setIsLogin] = React.useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        
-    }, []);
+    useEffect(() => {}, []);
 
     const validate = values => {
         const errors = {};
@@ -23,6 +21,9 @@ const Authentication = () => {
             if (!values.password) errors.password = 'Required';
             if (!values.confirmPassword) errors.confirmPassword = 'Required';
             if (values.password !== values.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+            if (!values.firstName) errors.firstName = 'Required';
+            if (!values.lastName) errors.lastName = 'Required';
+            if (!values.email) errors.email = 'Required';
         }
 
         return errors;
@@ -33,13 +34,25 @@ const Authentication = () => {
 
         const endpoint = isLogin ? '/api/login/' : '/api/register/';
         let data = { username: values.username, password: values.password };
-        if (!isLogin) data.confirm_password = values.confirmPassword;
+        if (!isLogin) {
+            data = {
+                ...data,
+                confirm_password: values.confirmPassword,
+                first_name: values.firstName,
+                last_name: values.lastName,
+                email: values.email
+            };
+        }
 
         axios.post(`http://localhost:8000${endpoint}`, data)
             .then(response => {
                 if (response.status === 200 || response.status === 201) {
                     if (isLogin)
-                        navigate('/');
+                        alert('Logged in successfully');
+                    else
+                        alert('Account created successfully');
+                    
+                    navigate('/');
                 }
             })
             .catch(error => alert('Error: ' + error.response?.data?.error || 'An error occurred'))
@@ -54,7 +67,10 @@ const Authentication = () => {
                     initialValues={{
                         username: '',
                         password: '',
-                        confirmPassword: ''
+                        confirmPassword: '',
+                        firstName: '',
+                        lastName: '',
+                        email: ''
                     }}
                     validate={validate}
                     onSubmit={handleSubmit}
@@ -100,6 +116,48 @@ const Authentication = () => {
                                 </>
                             ) : (
                                 <>
+                                    <label htmlFor="firstName">First Name</label>
+                                    <input
+                                        type="text"
+                                        name="firstName"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.firstName}
+                                        autoComplete="off"
+                                        spellCheck="false"
+                                    />
+                                    <span className="error">
+                                        {errors.firstName && touched.firstName && errors.firstName}
+                                    </span>
+
+                                    <label htmlFor="lastName">Last Name</label>
+                                    <input
+                                        type="text"
+                                        name="lastName"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.lastName}
+                                        autoComplete="off"
+                                        spellCheck="false"
+                                    />
+                                    <span className="error">
+                                        {errors.lastName && touched.lastName && errors.lastName}
+                                    </span>
+
+                                    <label htmlFor="email">Email</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        value={values.email}
+                                        autoComplete="off"
+                                        spellCheck="false"
+                                    />
+                                    <span className="error">
+                                        {errors.email && touched.email && errors.email}
+                                    </span>
+
                                     <label htmlFor="username">Username</label>
                                     <input
                                         type="text"

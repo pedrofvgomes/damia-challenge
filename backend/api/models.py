@@ -72,8 +72,6 @@ class Client(models.Model):
 
     # custom fields
     location = models.CharField(max_length=255, null=True)
-    website = models.URLField(null=True)
-    phone = models.CharField(max_length=20, null=True)
     
 """
 This model represents a recruiter, which is associated to a Client.
@@ -99,6 +97,8 @@ class Candidate(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
     
     # custom fields
+    resume = models.FileField(upload_to='resumes/', null=True)
+    cover_letter = models.TextField(default='')    
 
 """
 Each position is associated to a recruiter, by whom it was posted,
