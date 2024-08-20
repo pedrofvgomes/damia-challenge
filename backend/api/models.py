@@ -71,7 +71,9 @@ class Client(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
 
     # custom fields
-    name = models.CharField(max_length=255, null=True)
+    location = models.CharField(max_length=255, null=True)
+    website = models.URLField(null=True)
+    phone = models.CharField(max_length=20, null=True)
     
 """
 This model represents a recruiter, which is associated to a Client.

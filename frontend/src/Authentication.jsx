@@ -11,7 +11,7 @@ const Authentication = observer(() => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(sessionStorage.getItem('token') !== null)
+        if (sessionStorage.getItem('token') !== null)
             navigate('/');
     }, []);
 
@@ -43,17 +43,9 @@ const Authentication = observer(() => {
                 if (response.status === 200 || response.status === 201) {
                     store.setAccessToken(response.data.access);
                     store.setRefreshToken(response.data.refresh);
-                    axios.get(`http://localhost:8000/api/user/?username=${values.username}`, {
-                        headers: {
-                            'Authorization': `Bearer ${response.data.access}`,
-                        }
-                    })
-                        .then(response => {
-                            if (response.status === 200) {
-                                store.setUser(response.data);
-                                navigate('/');
-                            }
-                        })
+                    if (isLogin)
+                        navigate('/');
+                    
                 }
             })
             .catch(error => alert('Error: ' + error.response?.data?.error || 'An error occurred'))

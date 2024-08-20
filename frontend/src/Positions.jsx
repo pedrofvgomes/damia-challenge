@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
+import axios from "axios";
 
-const Browse = observer(() => {
+const Positions = observer(() => {
     const headers = [
         'Name',
         'Location',
@@ -24,6 +25,16 @@ const Browse = observer(() => {
             numberOfApplicants: 10
         }
     ]);
+
+    useEffect(() => {
+        axios.get('http://localhost:8000/api/positions')
+            .then(response => {
+                if (response.status === 200) {
+                    console.log(response.data.positions);
+                    setPositions(response.data.positions);
+                }
+            })
+    }, []);
 
     useEffect(() => {
         let sortedPositions = [...positions];
@@ -98,13 +109,13 @@ const Browse = observer(() => {
     const drawPositions = () => {
 
         return (
-            <div id="positions">
+            <div id="positions-list">
                 {positions.map(position => {
                     return (
                         <div className='position'>
                             <span>{position.name}</span>
                             <span>{position.location}</span>
-                            <span>{position.datePosted}</span>
+                            <span>{position.datePosted.split('T')[0].split('-').reverse().join('/')}</span>
                             <span>{position.numberOfApplicants}</span>
                         </div>
                     )
@@ -124,4 +135,4 @@ const Browse = observer(() => {
     );
 });
 
-export default Browse;
+export default Positions;

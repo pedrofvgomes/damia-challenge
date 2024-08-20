@@ -14,7 +14,8 @@ const Layout = observer(() => {
 
     const links = [
         'dashboard',
-        'browse',
+        'candidates',
+        'positions',
         'create'
     ]
 
@@ -56,10 +57,6 @@ const Layout = observer(() => {
             </nav>
 
             <main id={title}>
-                <h1>
-                    {title.charAt(0).toUpperCase() + title.slice(1)}
-                </h1>
-
                 <Outlet />
             </main>
         </div>

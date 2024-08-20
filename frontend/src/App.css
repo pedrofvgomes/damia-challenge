@@ -27,7 +27,7 @@
   background-color: rgb(240, 240, 240);
 }
 
-#authentication form {
+#authentication form, #complete-profile form {
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -146,11 +146,11 @@ main > h1:first-child{
   color: #73d0b9;
 }
 
-#browse{
+#positions{
   height: 100%;
 }
 
-#browse > div{
+#positions > div{
   border-radius: 15px;
   overflow: hidden;
   box-shadow: 0px 0px 10px rgba(115, 208, 185, 0.5);
@@ -194,9 +194,9 @@ main > h1:first-child{
   right: 20px;
 }
 
-#positions{
+#positions-list{
   overflow: auto;
-  height: 70vh;
+  height: 75vh;
 }
 .position {
   display: flex;
@@ -223,4 +223,11 @@ main > h1:first-child{
   padding: 20px 10px;
   color: #2f3130;
   font-size: 18px;
+}
+
+#complete-profile form div{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-self: center;
 }

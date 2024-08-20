@@ -5,8 +5,10 @@ import Authentication from './Authentication';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
 import CompleteProfile from './CompleteProfile';
-import Browse from './Browse';
+import Positions from './Positions';
 import Position from './Position';
+import Candidates from './Candidates';
+import Candidate from './Candidate';
 
 const App = observer(() => {
   return (
@@ -16,8 +18,10 @@ const App = observer(() => {
         <Route path='/complete-profile' element={<CompleteProfile />} />
         <Route path='*' element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path='browse' element={<Browse />} />
-          <Route path='position/:id' element={<Position />} />
+          <Route path='candidates' element={<Candidates />} />
+          <Route path='candidates/:id' element={<Candidate />} />
+          <Route path='positions' element={<Positions />} />
+          <Route path='positions/:id' element={<Position />} />
         </Route>
       </Routes>
     </BrowserRouter>
