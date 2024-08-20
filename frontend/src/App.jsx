@@ -4,7 +4,6 @@ import Authentication from './Authentication';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
 import Positions from './Positions';
-import Position from './Position';
 import Candidates from './Candidates';
 import Candidate from './Candidate';
 import Recruiters from './Recruiters';
@@ -20,7 +19,6 @@ const App = () => {
           <Route path='candidates' element={<Candidates />} />
           <Route path='candidates/:id' element={<Candidate />} />
           <Route path='positions' element={<Positions />} />
-          <Route path='positions/:id' element={<Position />} />
         </Route>
       </Routes>
     </BrowserRouter>

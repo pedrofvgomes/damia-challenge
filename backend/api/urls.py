@@ -11,5 +11,6 @@ urlpatterns = [
     path('recruiters/', views.get_recruiters, name='recruiters'),
     path('positions/', views.get_positions, name='positions'),
     path('positions/<int:position_id>/', views.get_position, name='position'),
+    path('delete-position/<int:position_id>/', views.delete_position, name='delete_position'),
     path('candidates/', views.get_candidates, name='candidates'),
 ]

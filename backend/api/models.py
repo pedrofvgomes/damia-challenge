@@ -113,8 +113,8 @@ class Position(models.Model):
     description = models.TextField()
     timestamp = models.DateTimeField()
     location = models.CharField(max_length=255)
-    salary_min = models.DecimalField(max_digits=10, decimal_places=2)
-    salary_max = models.DecimalField(max_digits=10, decimal_places=2)
+    salary_min = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    salary_max = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     
 """
 This model represents a job application made by a candidate 

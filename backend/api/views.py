@@ -89,7 +89,7 @@ def get_position(request, position_id):
         'location': position.location,
         'datePosted': position.timestamp,
         'numberOfApplicants': JobApplication.objects.filter(position=position).count(),
-        'salary': f'${position.salary_min} - ${position.salary_max}',
+        'salary': f'${position.salary_min} - ${position.salary_max}' if position.salary_min is not None and position.salary_max is not None else 'Not specified',
         'recruiter': {
             'id': position.recruiter.id,
             'name': f'{position.recruiter.account.first_name} {position.recruiter.account.last_name}',
@@ -136,7 +136,10 @@ def get_candidates(request):
             candidates_json.append({
                 'id': application.candidate.id,
                 'name': f'{application.candidate.account.first_name} {application.candidate.account.last_name}',
-                'position': position.title,
+                'position': {
+                    'id': application.position.id,
+                    'name': application.position.title
+                },
                 'status': latest_status.status,
                 'lastStatusUpdate': latest_status.timestamp
             })
@@ -228,3 +231,18 @@ def remove_recruiter(request):
     recruiter.save()
     
     return JsonResponse({'message': 'Recruiter removed successfully'}, status=200)
+
+@csrf_exempt
+def delete_position(request, position_id):
+    """
+    Deletes a position.
+    """
+    
+    try:
+        position = Position.objects.get(id=position_id)
+    except Position.DoesNotExist:
+        return JsonResponse({'error': 'Position not found.'}, status=404)
+    
+    position.delete()
+    
+    return JsonResponse({'message': 'Position deleted successfully'}, status=200)

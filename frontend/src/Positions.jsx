@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Button, Modal } from "@mui/material";
 
 const Positions = () => {
     const headers = [
@@ -105,7 +106,19 @@ const Positions = () => {
                         <div
                             className='position'
                             onClick={() => {
-                                window.location.href = `/positions/${position.id}`;
+                                axios.get(`http://localhost:8000/api/positions/${position.id}`)
+                                    .then(response => {
+                                        if (response.status === 200) {
+                                            console.log(response.data.position);
+                                            setOpenPosition(response.data.position);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Error fetching position:", error);
+                                    })
+                                    .finally(() => {
+                                        setModalOpen(true);
+                                    });
                             }}
                         >
                             <span>{position.name}</span>
@@ -119,12 +132,80 @@ const Positions = () => {
         )
     }
 
+    const [modalOpen, setModalOpen] = useState(false);
+    const [openPosition, setOpenPosition] = useState({});
+
+    const drawPositionModal = () => {
+        if (Object.keys(openPosition).length === 0) return null;
+        else return (
+            <>
+                <h1>{openPosition.name}</h1>
+                <div>
+                    <p id="description">
+                        {openPosition.description}
+                    </p>
+                    <div id="details">
+                        <span><strong>Company</strong> <br />{openPosition.client.name} <br /> {openPosition.client.email}</span>
+                        <span><strong>Recruiter</strong> <br />{openPosition.recruiter.name} <br /> {openPosition.recruiter.email}</span>
+                        <span><strong>Salary</strong> <br />{openPosition.salary}</span>
+                        <strong>Applicants</strong>
+                        <div id="applicants">
+                            {openPosition.candidates.map(applicant => {
+                                return (
+                                    <div>
+                                        <span>{applicant.name}</span>
+                                        <br />
+                                        <span>{applicant.email}</span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </div>
+                <Button
+                    id="delete-position"
+                    onClick={() => {
+                        window.confirm("Are you sure you want to delete this position?") &&
+
+                        axios.delete(`http://localhost:8000/api/delete-position/${openPosition.id}`)
+                            .then(response => {
+                                if (response.status === 200) {
+                                    window.location.reload();
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error deleting position:", error);
+                            })
+                            .finally(() => {
+                                setModalOpen(false);
+                                setOpenPosition({});
+                            });
+                    }}
+                >
+                    Delete
+                </Button>
+            </>
+        )
+    }
+
     return (
         <div>
             <div>
                 {drawHeader()}
                 {drawPositions()}
             </div>
+
+            <Modal
+                open={modalOpen}
+                onClose={() => {
+                    setModalOpen(false);
+                    setOpenPosition({});
+                }}
+            >
+                <div id="position">
+                    {drawPositionModal()}
+                </div>
+            </Modal>
 
         </div>
     );

@@ -109,9 +109,12 @@ const Candidates = () => {
                         <div
                             key={candidate.id}
                             className='candidate'
+                            onClick={() => {
+                                window.location.href = `/applications/${candidate.id}-${candidate.position.id}`;
+                            }}
                         >
                             <span>{candidate.name}</span>
-                            <span>{candidate.position}</span>
+                            <span>{candidate.position.name}</span>
                             <span>{candidate.status.charAt(0).toUpperCase() + candidate.status.slice(1)}</span>
                             <span>{new Date(candidate.lastStatusUpdate).toLocaleDateString()}</span>
                         </div>
