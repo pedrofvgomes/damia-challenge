@@ -17,4 +17,5 @@ urlpatterns = [
     path('add-status/', views.add_status, name='add_status'),
     path('delete-status/<str:status_id>/', views.delete_status, name='status'),
     path('apply/', views.apply, name='apply'),
+    path('create-position/', views.create_position, name='create_position'),
 ]

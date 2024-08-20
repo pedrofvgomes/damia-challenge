@@ -358,3 +358,36 @@ def apply(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+    
+@require_POST
+@csrf_exempt
+def create_position(request):
+    """
+    Handles the creation of a new position.
+    """
+    try:
+        data = json.loads(request.body)
+
+        name = data.get('name')
+        location = data.get('location')
+        salary_min = data.get('salary_min')
+        salary_max = data.get('salary_max')
+        description = data.get('description')
+        
+        recruiter = Recruiter.objects.get(account=Account.objects.get(username='recruiter2_1'))
+        
+        position = Position.objects.create(
+            title=name,
+            location=location,
+            salary_min=salary_min,
+            salary_max=salary_max,
+            description=description,
+            recruiter=recruiter, 
+            timestamp=timezone.now()
+        )
+        position.save()
+        
+        return JsonResponse({'message': 'Position created successfully!'}, status=201)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

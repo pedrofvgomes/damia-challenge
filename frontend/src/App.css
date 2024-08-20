@@ -280,6 +280,9 @@ main>h1:first-child {
   color: white !important;
   font-weight: bold !important;
 }
+button#cancel-button.MuiButton-containedPrimary {
+  background-color: red !important;
+}
 
 #invite-recruiter {
   position: absolute;
@@ -407,12 +410,14 @@ main>h1:first-child {
   word-wrap: break-word;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) inset;
   border-radius: 10px;
+  margin-top: 5px;
 }
 
 #applicants>div {
   width: 100%;
   padding: 20px 0px;
   border-bottom: solid 1px #73d0b9;
+  background-color: rgb(180, 180, 180, 0.2);
 }
 
 #delete-position {
@@ -513,4 +518,19 @@ main>h1:first-child {
 }
 #application-form strong{
   color: #73d0b9;
+}
+
+#create-form{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  background-color: white;
+  width: fit-content;
+  align-self: center;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }

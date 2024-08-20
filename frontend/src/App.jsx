@@ -7,6 +7,7 @@ import Candidates from './Candidates';
 import Recruiters from './Recruiters';
 import Application from './Application';
 import ApplicationForm from './ApplicationForm';
+import Create from './Create';
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
           <Route path='applications/:id' element={<Application />} />
           <Route path='positions' element={<Positions />} />
           <Route path='apply/:id' element={<ApplicationForm />} />
+          <Route path='create' element={<Create />} />
           <Route path='*' element={<Navigate to='/' />} />
         </Route>
       </Routes>

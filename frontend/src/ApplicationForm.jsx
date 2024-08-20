@@ -43,6 +43,8 @@ const ApplicationForm = () => {
             .then(response => {
                 if (response.status === 200) {
                     setSubmitStatus("Application submitted successfully.");
+
+                    window.location.href = '/';
                 }
             })
             .catch(error => {
