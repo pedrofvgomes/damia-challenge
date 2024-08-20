@@ -148,17 +148,22 @@ const Positions = () => {
                         <span><strong>Company</strong> <br />{openPosition.client.name} <br /> {openPosition.client.email}</span>
                         <span><strong>Recruiter</strong> <br />{openPosition.recruiter.name} <br /> {openPosition.recruiter.email}</span>
                         <span><strong>Salary</strong> <br />{openPosition.salary}</span>
-                        <strong>Applicants</strong>
-                        <div id="applicants">
-                            {openPosition.candidates.map(applicant => {
-                                return (
-                                    <div>
-                                        <span>{applicant.name}</span>
-                                        <br />
-                                        <span>{applicant.email}</span>
-                                    </div>
-                                )
-                            })}
+                        <span><strong>Location</strong> <br />{openPosition.location}</span>
+                        <span><strong>Date Posted</strong> <br />{openPosition.datePosted.split('T')[0].split('-').reverse().join('/')}</span>
+                        <span><strong>Number of Applicants</strong> <br />{openPosition.numberOfApplicants}</span>
+                        <div>
+                            <strong>Applicants</strong>
+                            <div id="applicants">
+                                {openPosition.candidates.map(applicant => {
+                                    return (
+                                        <div>
+                                            <span>{applicant.name}</span>
+                                            <br />
+                                            <span>{applicant.email}</span>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -167,19 +172,19 @@ const Positions = () => {
                     onClick={() => {
                         window.confirm("Are you sure you want to delete this position?") &&
 
-                        axios.delete(`http://localhost:8000/api/delete-position/${openPosition.id}`)
-                            .then(response => {
-                                if (response.status === 200) {
-                                    window.location.reload();
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Error deleting position:", error);
-                            })
-                            .finally(() => {
-                                setModalOpen(false);
-                                setOpenPosition({});
-                            });
+                            axios.delete(`http://localhost:8000/api/delete-position/${openPosition.id}`)
+                                .then(response => {
+                                    if (response.status === 200) {
+                                        window.location.reload();
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting position:", error);
+                                })
+                                .finally(() => {
+                                    setModalOpen(false);
+                                    setOpenPosition({});
+                                });
                     }}
                 >
                     Delete
