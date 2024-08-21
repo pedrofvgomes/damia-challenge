@@ -23,6 +23,7 @@ This system is designed to manage job applications within companies. It allows c
   - Candidates can be upgraded to recruiters by client invitation. Once invited, they gain recruiter privileges and can be removed by the client if needed.
 
 ## Installation and Running
+You should open two separate terminals, one for backend and another for frontend.
 
 ### Backend
 
