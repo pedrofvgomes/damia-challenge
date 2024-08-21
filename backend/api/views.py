@@ -407,6 +407,10 @@ def apply(request):
 
         candidate = Account.objects.get(username=get_authenticated_user(request).username)
         position = Position.objects.get(id=position_id)
+        
+        # if the application already exists, return an error
+        if JobApplication.objects.filter(candidate=Candidate.objects.get(account=candidate), position=position).exists():
+            return JsonResponse({'error': 'Application already exists'}, status=400)
 
         job_application = JobApplication.objects.create(
             position=position,
