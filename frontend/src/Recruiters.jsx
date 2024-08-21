@@ -21,6 +21,7 @@ const Recruiters = () => {
         axios.get('http://localhost:8000/api/recruiters')
             .then(response => {
                 if (response.status === 200) {
+                    console.log(response.data.recruiters);
                     setRecruiters(response.data.recruiters);
                 }
             })

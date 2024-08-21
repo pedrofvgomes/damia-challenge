@@ -137,7 +137,7 @@ const MyApplications = () => {
                                 }}
                             >
                                 <span>{application.position.name}</span>
-                                <span>{application.status}</span>
+                                <span>{application.status.charAt(0).toUpperCase() + application.status.slice(1)}</span>
                                 <span>{new Date(application.lastStatusUpdate).toLocaleDateString()}</span>
                             </div>
                         );
