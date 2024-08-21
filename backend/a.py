@@ -6,15 +6,6 @@ import os
 import random
 
 def exec():
-    # Define file path for resume
-    resume_file_path = os.path.join('media', 'resumes', 'example.pdf')
-
-    # Create example resume file if it doesn't exist
-    if not os.path.isfile(resume_file_path):
-        print(f"Creating dummy resume file at {resume_file_path}")
-        with open(resume_file_path, 'w') as f:
-            f.write("This is a placeholder PDF file.")  # Create a dummy PDF file
-
     # Helper function to get or create an Account with first and last names
     def get_or_create_account(username, email, password, user_type, first_name='', last_name=''):
         print(f"Creating account for username: {username}, email: {email}")
@@ -63,7 +54,7 @@ def exec():
     damia_candidate, created = Candidate.objects.get_or_create(
         account=damia_candidate_account,
         defaults={
-            'resume': File(open(resume_file_path, 'rb')),
+            'resume': None,
             'cover_letter': 'Cover letter for Damia Candidate.'
         }
     )
@@ -100,7 +91,7 @@ def exec():
         candidate, created = Candidate.objects.get_or_create(
             account=acc,
             defaults={
-                'resume': File(open(resume_file_path, 'rb')),
+                'resume': None,
                 'cover_letter': f'Cover letter for {acc.username}.'
             }
         )
@@ -135,7 +126,7 @@ def exec():
                 position=position,
                 candidate=candidate,
                 defaults={
-                    'resume': File(open(resume_file_path, 'rb')),
+                    'resume': None,
                     'cover_letter': f'Cover letter for application by {candidate.account.username} to position {position.title}'
                 }
             )

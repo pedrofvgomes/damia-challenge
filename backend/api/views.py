@@ -349,7 +349,7 @@ def get_application(request, id):
             'status': status.status,
             'timestamp': status.timestamp
         } for status in application.statuses.all()],
-        'resume': application.resume.url,
+        'resume': application.resume.url if application.resume else None,
         'cover_letter': application.cover_letter
     }
     
@@ -427,7 +427,7 @@ def apply(request):
         job_application.save()
         
         # save the uploaded file
-        with open(f'media/resumes/{resume.name}', 'wb+') as destination:
+        with open(f'media/{resume.name}', 'wb+') as destination:
             for chunk in resume.chunks():
                 destination.write(chunk)
                 

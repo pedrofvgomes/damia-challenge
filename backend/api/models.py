@@ -97,7 +97,7 @@ class Candidate(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
     
     # custom fields
-    resume = models.FileField(upload_to='resumes/', null=True)
+    resume = models.FileField(upload_to='', null=True)
     cover_letter = models.TextField(default='')    
 
 """
@@ -129,7 +129,7 @@ class JobApplication(models.Model):
     
     # custom fields
     statuses = models.ManyToManyField('ApplicationStatus', related_name='applications')
-    resume = models.FileField(upload_to='resumes/', null=True)
+    resume = models.FileField(upload_to='', null=True)
     cover_letter = models.TextField(default='')
 
 """
