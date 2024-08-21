@@ -15,21 +15,32 @@ const Layout = (props) => {
 
     const title = window.location.pathname.replace('/', '') || 'dashboard';
 
+    // Updated accessible links to include 'applications' for recruiters
     const accessibleLinks = {
-        'recruiter': ['positions', 'candidates', 'create'],
-        'candidate': ['positions', 'apply'],
-        'client': ['recruiters', 'positions']
+        'recruiter': ['positions', 'candidates', 'create', 'applications'],
+        'candidate': ['positions', 'apply', 'my-applications'],
+        'client': ['recruiters']
     };
+
+    const linksToRender = {
+        recruiter: ['positions', 'candidates', 'create'],
+        candidate: ['positions', 'my-applications'],
+        client: ['recruiters']
+    }
 
     const renderLinks = () => {
         if (!user?.user_type) return null;
 
-        return accessibleLinks[user.user_type].map(link => {
+        return linksToRender[user.user_type].map(link => {
             const selected = link === title ? 'selected' : '';
 
-            return <a key={link} href={`/${link}`} className={selected}>
-                {link.charAt(0).toUpperCase() + link.slice(1)}
-            </a>
+            return (
+                <a key={link} href={`/${link}`} className={selected}>
+                    {
+                        link === 'my-applications' ? 'My Applications' :
+                            link.charAt(0).toUpperCase() + link.slice(1)}
+                </a>
+            );
         });
     };
 
@@ -42,7 +53,10 @@ const Layout = (props) => {
             const validPaths = accessibleLinks[user.user_type];
 
             // If the current path is not in validPaths, redirect to home
-            if (!validPaths.includes(currentPath) && currentPath !== '') {
+            if (!validPaths.some(path =>
+                path === currentPath ||
+                (path === 'apply' && currentPath.startsWith('apply/')) ||
+                (path === 'applications' && currentPath.startsWith('applications/')))) {
                 navigate('/');
             }
         }

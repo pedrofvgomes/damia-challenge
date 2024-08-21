@@ -97,11 +97,20 @@ def get_positions(request):
     Returns the list of positions for the authenticated recruiter.
     """
     account = get_authenticated_user(request)
-    if not account or account.user_type != 'recruiter':
+    if not account:
         return JsonResponse({'message': 'Forbidden'}, status=403)
     
-    recruiter = Recruiter.objects.get(account=account)
-    positions = Position.objects.filter(recruiter=recruiter)
+    positions = []
+    
+    if account and account.user_type == 'candidate':
+        # all the positions the candidate hasn't applied to
+        candidate = Candidate.objects.get(account=account)
+        positions = Position.objects.exclude(jobapplication__candidate=candidate)
+
+    if account and account.user_type == 'recruiter':
+        recruiter = Recruiter.objects.get(account=account)
+        positions = Position.objects.filter(recruiter=recruiter)
+
     positions_json = [{
         'id': position.id,
         'name': position.title,
@@ -117,13 +126,11 @@ def get_position(request, position_id):
     Returns the position's information.
     """
     account = get_authenticated_user(request)
-    if not account or account.user_type != 'recruiter':
+    if not account:
         return JsonResponse({'message': 'Forbidden'}, status=403)
-
-    recruiter = Recruiter.objects.get(account=account)
     
     try:
-        position = Position.objects.get(id=position_id, recruiter=recruiter)
+        position = Position.objects.get(id=position_id)
     except Position.DoesNotExist:
         return JsonResponse({'error': 'Position not found.'}, status=404)
     
@@ -352,7 +359,9 @@ def get_application(request, id):
             'id': status.id,
             'status': status.status,
             'timestamp': status.timestamp
-        } for status in application.statuses.all()]
+        } for status in application.statuses.all()],
+        'resume': application.resume.url,
+        'cover_letter': application.cover_letter
     }
     
     return JsonResponse({'application': application_json}, status=200)
@@ -407,7 +416,7 @@ def apply(request):
         cover_letter = request.POST.get('cover_letter')
         resume = request.FILES.get('resume') 
 
-        candidate = Account.objects.get(username='candidate1_1') #fixme       
+        candidate = Account.objects.get(username=get_authenticated_user(request).username)
         position = Position.objects.get(id=position_id)
 
         job_application = JobApplication.objects.create(
@@ -437,6 +446,7 @@ def apply(request):
         return JsonResponse({'message': 'Application submitted successfully'}, status=201)
 
     except Exception as e:
+        print(e)
         return JsonResponse({'error': str(e)}, status=400)
     
 @require_POST
@@ -454,7 +464,7 @@ def create_position(request):
         salary_max = data.get('salary_max')
         description = data.get('description')
         
-        recruiter = Recruiter.objects.get(account=Account.objects.get(username='teste123')) #fixme
+        recruiter = Recruiter.objects.get(account=Account.objects.get(username=get_authenticated_user(request).username))
          
         position = Position.objects.create(
             title=name,
@@ -470,4 +480,5 @@ def create_position(request):
         return JsonResponse({'message': 'Position created successfully!'}, status=201)
 
     except Exception as e:
+        print(e)
         return JsonResponse({'error': str(e)}, status=400)

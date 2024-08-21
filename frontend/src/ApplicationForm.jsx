@@ -35,13 +35,15 @@ const ApplicationForm = () => {
         formData.append('resume', resume);
         formData.append('position_id', position.id);
 
+        console.log(formData);
+
         axios.post('http://localhost:8000/api/apply/', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         })
             .then(response => {
-                if (response.status === 200) {
+                if (response.status === 201) {
                     setSubmitStatus("Application submitted successfully.");
 
                     window.location.href = '/';

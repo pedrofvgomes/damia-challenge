@@ -147,7 +147,10 @@ const Application = () => {
                 </>}
                 {application.resume && <>
                     <p><strong>Resume:</strong></p>
-                    <a href={application.resume} target="_blank" rel="noreferrer">View resume</a>
+                    <a href='' onClick={(e) => {
+                        e.preventDefault();
+                        window.open(`http://localhost:8000${application.resume}`, '_blank');
+                    }} target="_blank" rel="noreferrer">View resume</a>
                 </>}
             </>
         )

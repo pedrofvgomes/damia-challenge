@@ -13,6 +13,9 @@ import axios from 'axios';
 // interceptor for axios to use the token
 axios.interceptors.request.use(
   config => {
+    if (config.url && !config.url.startsWith('http://localhost:8000/api/')) {
+      return config;
+    }
     const token = sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = token;

@@ -106,19 +106,25 @@ const Positions = () => {
                         <div
                             className='position'
                             onClick={() => {
-                                axios.get(`http://localhost:8000/api/positions/${position.id}`)
-                                    .then(response => {
-                                        if (response.status === 200) {
-                                            console.log(response.data.position);
-                                            setOpenPosition(response.data.position);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error("Error fetching position:", error);
-                                    })
-                                    .finally(() => {
-                                        setModalOpen(true);
-                                    });
+                                let userType = document.querySelector('#user-info strong').innerText.split('(')[1].split(')')[0];
+
+                                if (userType === 'Recruiter')
+                                    axios.get(`http://localhost:8000/api/positions/${position.id}`)
+                                        .then(response => {
+                                            if (response.status === 200) {
+                                                console.log(response.data.position);
+                                                setOpenPosition(response.data.position);
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Error fetching position:", error);
+                                        })
+                                        .finally(() => {
+                                            setModalOpen(true);
+                                        });
+                                
+                                if (userType === 'Candidate')
+                                    window.location.href = `/apply/${position.id}`;
                             }}
                         >
                             <span>{position.name}</span>
