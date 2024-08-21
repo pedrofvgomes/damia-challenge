@@ -26,8 +26,6 @@ const Application = () => {
         axios.get(`http://localhost:8000/api/applications/${applicationId}`)
             .then(response => {
                 if (response.status === 200) {
-                    console.log(response.data.application)
-
                     setApplication(response.data.application);
                     // order the statuses by descending timestamp
                     const sortedStatuses = response.data.application.statuses.sort((a, b) => {

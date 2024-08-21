@@ -9,7 +9,6 @@ const InviteRecruiter = () => {
     const [selected, setSelected] = React.useState([]);
 
     const addRecruiter = () => {
-        console.log(selected)
         axios.post('http://localhost:8000/api/add-recruiters/', {
             recruiters: selected,
         })

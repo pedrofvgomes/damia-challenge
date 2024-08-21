@@ -24,17 +24,6 @@ def get_authenticated_user(request):
     
     return None
     
-# the decorator we'll use to restrict access based on user type
-def user_type_required(user_type):
-    def decorator(view_func):
-        def _wrapped_view(request, *args, **kwargs):
-            user = get_authenticated_user(request)
-            if user and user.user_type == user_type:
-                return view_func(request, *args, **kwargs)
-            return JsonResponse({'message': 'Forbidden'}, status=403)
-        return _wrapped_view
-    return decorator
-
 @csrf_exempt
 @require_POST
 def login_view(request):
@@ -446,7 +435,6 @@ def apply(request):
         return JsonResponse({'message': 'Application submitted successfully'}, status=201)
 
     except Exception as e:
-        print(e)
         return JsonResponse({'error': str(e)}, status=400)
     
 @require_POST
@@ -480,5 +468,42 @@ def create_position(request):
         return JsonResponse({'message': 'Position created successfully!'}, status=201)
 
     except Exception as e:
-        print(e)
         return JsonResponse({'error': str(e)}, status=400)
+
+def my_applications(request):
+    """
+    Returns the list of applications for the authenticated candidate.
+    """
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'candidate':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
+    
+    candidate = Candidate.objects.get(account=account)
+    applications = JobApplication.objects.filter(candidate=candidate)
+    
+    applications_json = [{
+        'id': application.id,
+        'position': {
+            'id': application.position.id,
+            'name': application.position.title,
+            'client': {
+                'id': application.position.recruiter.client.id,
+                'name': f'{application.position.recruiter.client.account.first_name} {application.position.recruiter.client.account.last_name}',
+                'email': application.position.recruiter.client.account.email
+            },
+            'recruiter': {
+                'id': application.position.recruiter.id,
+                'name': f'{application.position.recruiter.account.first_name} {application.position.recruiter.account.last_name}',
+                'email': application.position.recruiter.account.email
+            },
+            'location': application.position.location,
+            'datePosted': application.position.timestamp,
+            'salary': f'${application.position.salary_min} - ${application.position.salary_max}' if application.position.salary_min is not None and application.position.salary_max is not None else 'Not specified',
+            'description': application.position.description,
+            'numberOfApplicants': JobApplication.objects.filter(position=application.position).count()
+        },
+        'status': application.statuses.order_by('-timestamp').first().status,
+        'lastStatusUpdate': application.statuses.order_by('-timestamp').first().timestamp,
+    } for application in applications]
+    
+    return JsonResponse({'applications': applications_json}, status=200)

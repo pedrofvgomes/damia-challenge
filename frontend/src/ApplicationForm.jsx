@@ -35,8 +35,6 @@ const ApplicationForm = () => {
         formData.append('resume', resume);
         formData.append('position_id', position.id);
 
-        console.log(formData);
-
         axios.post('http://localhost:8000/api/apply/', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'

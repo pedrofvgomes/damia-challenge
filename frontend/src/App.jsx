@@ -9,6 +9,7 @@ import Application from './Application';
 import ApplicationForm from './ApplicationForm';
 import Create from './Create';
 import axios from 'axios';
+import MyApplications from './MyApplications';
 
 // interceptor for axios to use the token
 axios.interceptors.request.use(
@@ -40,6 +41,7 @@ const App = () => {
           <Route path='positions' element={<Positions />} />
           <Route path='apply/:id' element={<ApplicationForm />} />
           <Route path='create' element={<Create />} />
+          <Route path='my-applications' element={<MyApplications />} />
           <Route path='*' element={<Navigate to={whereToRedirect} />} />
         </Route>
       </Routes>

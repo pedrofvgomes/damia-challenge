@@ -112,7 +112,6 @@ const Positions = () => {
                                     axios.get(`http://localhost:8000/api/positions/${position.id}`)
                                         .then(response => {
                                             if (response.status === 200) {
-                                                console.log(response.data.position);
                                                 setOpenPosition(response.data.position);
                                             }
                                         })
