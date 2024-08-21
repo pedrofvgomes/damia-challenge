@@ -59,6 +59,8 @@ You should open two separate terminals, one for backend and another for frontend
     ```bash
     npm run dev
     ```
+Now open your browser on http://localhost:5173 and you're ready to go!
+I've created the accounts damia-client, damia-recruiter and damia-candidate for testing, whose passwords are 12345678.
 
 ## Notes
 
