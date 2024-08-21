@@ -96,9 +96,11 @@ def get_positions(request):
     """
     Returns the list of positions for the authenticated recruiter.
     """
-    # Assume the user is authenticated via session for now
-    recruiter = Recruiter.objects.get(account=Account.objects.get(username='recruiter2_1')) #fixme
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'recruiter':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
     
+    recruiter = Recruiter.objects.get(account=account)
     positions = Position.objects.filter(recruiter=recruiter)
     positions_json = [{
         'id': position.id,
@@ -114,9 +116,14 @@ def get_position(request, position_id):
     """
     Returns the position's information.
     """
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'recruiter':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
 
+    recruiter = Recruiter.objects.get(account=account)
+    
     try:
-        position = Position.objects.get(id=position_id)
+        position = Position.objects.get(id=position_id, recruiter=recruiter)
     except Position.DoesNotExist:
         return JsonResponse({'error': 'Position not found.'}, status=404)
     
@@ -155,22 +162,20 @@ def get_candidates(request):
     """
     Returns the list of candidates for the authenticated recruiter, along with their positions, status, and last status update.
     """
-    # Assume the user is authenticated via session for now
-    recruiter = Recruiter.objects.get(account=Account.objects.get(username='teste123'))#fixme
-    
-    # Get all positions associated with the recruiter
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'recruiter':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    recruiter = Recruiter.objects.get(account=account)
     positions = Position.objects.filter(recruiter=recruiter)
-    
     candidates_json = []
-    
+
     for position in positions:
-        # Get all job applications for this position
         applications = JobApplication.objects.filter(position=position).select_related('candidate', 'position')
-        
+
         for application in applications:
-            # Fetch the most recent status update for the candidate
             latest_status = application.statuses.order_by('-timestamp').first()
-            
+
             candidates_json.append({
                 'id': application.candidate.id,
                 'name': f'{application.candidate.account.first_name} {application.candidate.account.last_name}',
@@ -181,22 +186,19 @@ def get_candidates(request):
                 'status': latest_status.status,
                 'lastStatusUpdate': latest_status.timestamp
             })
-    
+
     return JsonResponse({'candidates': candidates_json}, status=200)
 
 def get_recruiters(request):
     search = request.GET.get('search', None)
     recruiters_json = []
-    
-    """
-    Returns the list of recruiters for the authenticated client.
-    
-    If the search parameter is provided, returns the list of recruiters that match the search query
-    and that are not associated to any client.
-    """
-    # Assume the user is authenticated via session for now
-    client = Client.objects.get(account=Account.objects.get(username='teste123'))#fixme
-    
+
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'client':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    client = Client.objects.get(account=account)
+
     if search is None:
         recruiters = Recruiter.objects.filter(client=client)
         recruiters_json = [{
@@ -205,35 +207,56 @@ def get_recruiters(request):
             'email': recruiter.account.email
         } for recruiter in recruiters]
     else:
-        # the recruiter can't 
+        # get recruiters that are not associated with the client, and candidates
         recruiters = Recruiter.objects.filter(account__username__icontains=search, client=None)
         recruiters_json = [{
             'id': recruiter.id,
             'name': f'{recruiter.account.first_name} {recruiter.account.last_name}',
-            'email': recruiter.account.email
+            'email': recruiter.account.email,
+            'isRecruiter': True
         } for recruiter in recruiters]
+        
+        candidates = Candidate.objects.filter(account__username__icontains=search)
+        candidates_json = [{
+            'id': candidate.id,
+            'name': f'{candidate.account.first_name} {candidate.account.last_name}',
+            'email': candidate.account.email,
+            'isRecruiter': False
+        } for candidate in candidates]
+        
+        recruiters_json.extend(candidates_json)
         
     return JsonResponse({'recruiters': recruiters_json}, status=200)
 
-@csrf_exempt
 @require_POST
+@csrf_exempt
 def add_recruiters(request):
     """
     Adds recruiters to the client's account.
     """
     data = json.loads(request.body)
-    print(data)
-    recruiter_ids = data.get('recruiterIds')
-    
-    # Assume the user is authenticated via session for now
-    client = Client.objects.get(account=Account.objects.get(username='teste123')) #fixme
-    
-    for recruiter_id in recruiter_ids:
-        recruiter = Recruiter.objects.get(id=recruiter_id)
-        recruiter.client = client
-        recruiter.account.user_type = 'recruiter'
-        Candidate.objects.get(account=recruiter.account).delete()
-        recruiter.save()
+    recruiters = data.get('recruiters')
+
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'client':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    client = Client.objects.get(account=account)
+
+    for recruiter in recruiters:
+        if recruiter['isRecruiter']:
+            recruiter = Recruiter.objects.get(id=recruiter['id'])
+            recruiter.client = client
+            recruiter.account.user_type = 'recruiter'
+            Candidate.objects.get(account=recruiter.account).delete()
+            recruiter.save()
+        else:
+            candidate = Candidate.objects.get(id=recruiter['id'])
+            account = candidate.account
+            account.user_type = 'recruiter'
+            account.save()
+            new_recruiter = Recruiter.objects.create(account=candidate.account, client=client)
+            new_recruiter.save()
     
     return JsonResponse({'message': 'Recruiters added successfully'}, status=200)
 
@@ -241,9 +264,10 @@ def get_user(request):
     """
     Returns the authenticated user's information.
     """
-    # Assume the user is authenticated via session for now
-    user = Account.objects.get(username='teste123') #fixme
-    
+    user = get_authenticated_user(request)
+    if not user:
+        return JsonResponse({'message': 'Unauthorized'}, status=401)
+
     user_json = {
         'id': user.id,
         'username': user.username,
@@ -262,8 +286,17 @@ def remove_recruiter(request):
     """
     data = json.loads(request.body)
     recruiter_id = data.get('recruiter_id')
-    
+
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'client':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    client = Client.objects.get(account=account)
+
     recruiter = Recruiter.objects.get(id=recruiter_id)
+    if recruiter.client != client:
+        return JsonResponse({'message': 'Not associated with this client'}, status=400)
+    
     recruiter.client = None
     recruiter.save()
     
@@ -274,9 +307,14 @@ def delete_position(request, position_id):
     """
     Deletes a position.
     """
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'recruiter':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    recruiter = Recruiter.objects.get(account=account)
     
     try:
-        position = Position.objects.get(id=position_id)
+        position = Position.objects.get(id=position_id, recruiter=recruiter)
     except Position.DoesNotExist:
         return JsonResponse({'error': 'Position not found.'}, status=404)
     
@@ -286,12 +324,20 @@ def delete_position(request, position_id):
 
 def get_application(request, id):
     candidate_id, position_id = id.split('-')
+
+    account = get_authenticated_user(request)
+    if not account or account.user_type != 'recruiter':
+        return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    recruiter = Recruiter.objects.get(account=account)
     
     try:
         application = JobApplication.objects.get(candidate__id=candidate_id, position__id=position_id)
+        if application.position.recruiter != recruiter:
+            return JsonResponse({'message': 'Forbidden'}, status=403)
     except JobApplication.DoesNotExist:
         return JsonResponse({'error': 'Application not found.'}, status=404)
-    
+
     application_json = {
         'candidate': {
             'id': application.candidate.id,
@@ -306,14 +352,7 @@ def get_application(request, id):
             'id': status.id,
             'status': status.status,
             'timestamp': status.timestamp
-        } for status in application.statuses.all()],
-        'recruiter': {
-            'id': application.position.recruiter.id,
-            'name': f'{application.position.recruiter.account.first_name} {application.position.recruiter.account.last_name}',
-            'email': application.position.recruiter.account.email
-        },
-        'resume': request.build_absolute_uri(application.resume.url) if application.resume else None,
-        'cover_letter': application.cover_letter
+        } for status in application.statuses.all()]
     }
     
     return JsonResponse({'application': application_json}, status=200)

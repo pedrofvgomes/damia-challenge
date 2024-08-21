@@ -9,8 +9,9 @@ const InviteRecruiter = () => {
     const [selected, setSelected] = React.useState([]);
 
     const addRecruiter = () => {
+        console.log(selected)
         axios.post('http://localhost:8000/api/add-recruiters/', {
-            recruiterIds: selected
+            recruiters: selected,
         })
             .then(response => {
                 if (response.status === 200) {
@@ -23,7 +24,7 @@ const InviteRecruiter = () => {
                 console.error("Error adding recruiters:", error);
             })
             .finally(() => {
-                window.location.reload();
+                //window.location.reload();
             });
     }
 
@@ -77,14 +78,17 @@ const InviteRecruiter = () => {
                                     key={index}
                                     onClick={() => {
                                         if (selected.includes(result.id)) {
-                                            setSelected(selected.filter(id => id !== result.id));
+                                            setSelected(selected.filter(res => res.id !== result.id));
                                         } else {
-                                            setSelected([...selected, result.id]);
+                                            setSelected([...selected, {
+                                                id: result.id,
+                                                isRecruiter: result.isRecruiter,
+                                            }]);
                                         }
                                     }}
                                     style={{
-                                        background: selected.includes(result.id) ? '#73d0b9' : 'none',
-                                        color: selected.includes(result.id) ? 'white' : '#73d0b9',
+                                        background: selected.filter(item => item.id === result.id).length > 0 ? '#73d0b9' : 'none',
+                                        color: selected.filter(item => item.id === result.id).length > 0 ? 'white' : '#73d0b9',
                                         cursor: 'pointer',
                                     }}
                                 >
